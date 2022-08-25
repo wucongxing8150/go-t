@@ -1,4 +1,4 @@
-module github.com/sivchari/gotwtr
+module github.com/wucongxing8150/go-t
 
 go 1.17
 
