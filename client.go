@@ -2,7 +2,10 @@ package gotwtr
 
 import (
 	"context"
+	"log"
 	"net/http"
+	"net/url"
+	"time"
 )
 
 const (
@@ -142,11 +145,26 @@ func WithHTTPClient(httpClient *http.Client) ClientOption {
 }
 
 func New(bearerToken string, opts ...ClientOption) *Client {
+	proxyAddr := "http://127.0.0.1:7890"
+	proxy, err := url.Parse(proxyAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	netTransport := &http.Transport{
+		Proxy:                 http.ProxyURL(proxy),
+		MaxIdleConnsPerHost:   10,
+		ResponseHeaderTimeout: time.Second * time.Duration(5),
+	}
+
 	c := &client{
 		consumerKey:    "",
 		consumerSecret: "",
 		bearerToken:    bearerToken,
-		client:         http.DefaultClient,
+		client: &http.Client{
+			Timeout:   time.Second * 10,
+			Transport: netTransport,
+		},
 	}
 	for _, opt := range opts {
 		opt(c)
